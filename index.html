@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pablo Custódio Imóveis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.6.0/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.10.0/dist/pptxgen.min.js"></script>
+    <style>
+        /* Reset de estilo */
+        body, html {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: rgba(240, 248, 255, 0.5); /* Fundo gelo transparente */
+        }
+
+        /* Cabeçalho */
+        .header {
+            background-color: #1F3A63;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            max-height: 80px; /* Tamanho da logo */
+            border: none;
+        }
+
+        .header-text {
+            color: white;
+            font-size: 1.8em; /* Tamanho do texto do cabeçalho */
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+        }
+
+        /* Seção de Gráficos */
+        .charts {
+            margin-top: 120px; /* Espaço para o cabeçalho fixo */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chart-container {
+            width: 80%;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container h3 {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        /* Estilo das tabelas */
+        .table-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-container th, .table-container td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .table-container th {
+            background-color: #f2f2f2;
+        }
+
+        .table-container input {
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+            padding: 4px;
+            font-size: 0.9em;
+        }
+
+        /* Seletor de mês e ano */
+        .selector {
+            margin: 20px;
+        }
+
+        .selector select {
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        /* Botão Exportar */
+        .export-button {
+            display: block;
+            width: 200px;
+            padding: 10px;
+            margin: 20px auto;
+            background-color: #1F3A63;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .export-button:hover {
+            background-color: #154360;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="logo.png" alt="Pablo Custódio Imóveis Logo" class="logo">
+            <div class="header-text">Pablo Custódio Imóveis</div>
+        </div>
+    </header>
+
+    <section class="charts">
+        <!-- Formulário de Seleção -->
+        <div class="selector">
+            <label for="monthSelect">Mês:</label>
+            <select id="monthSelect">
+                <option value="0">Janeiro</option>
+                <option value="1">Fevereiro</option>
+                <option value="2">Março</option>
+                <option value="3">Abril</option>
+                <option value="4">Maio</option>
+                <option value="5">Junho</option>
+                <option value="6">Julho</option>
+                <option value="7">Agosto</option>
+                <option value="8">Setembro</option>
+                <option value="9">Outubro</option>
+                <option value="10">Novembro</option>
+                <option value="11">Dezembro</option>
+            </select>
+
+            <label for="yearSelect">Ano:</label>
+            <select id="yearSelect">
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+            </select>
+
+            <button id="updateCharts">Atualizar Gráficos</button>
+        </div>
+
+        <div class="chart-container">
+            <h3>Receita Bruta</h3>
+            <canvas id="grossRevenueChart"></canvas>
+            <div class="table-container">
+                <h4>Manutenção de Valores - Receita Bruta</h4>
+                <table id="grossRevenueTable">
+                    <thead>
+                        <tr>
+                            <th>Mês</th>
+                            <th>2023</th>
+                            <th>2024</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados da tabela serão inseridos aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="chart-container">
+            <h3>Custo Imobiliária</h3>
+            <canvas id="costChart"></canvas>
+            <div class="table-container">
+                <h4>Manutenção de Valores - Custo Imobiliária</h4>
+                <table id="costTable">
+                    <thead>
+                        <tr>
+                            <th>Mês</th>
+                            <th>2023</th>
+                            <th>2024</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados da tabela serão inseridos aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="chart-container">
+            <h3>Receita Líquida</h3>
+            <canvas id="netRevenueChart"></canvas>
+            <div class="table-container">
+                <h4>Manutenção de Valores - Receita Líquida</h4>
+                <table id="netRevenueTable">
+                    <thead>
+                        <tr>
+                            <th>Mês</th>
+                            <th>2023</th>
+                            <th>2024</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados da tabela serão inseridos aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <button class="export-button" id="exportPpt">Exportar em PowerPoint</button>
+
+    <script>
+        // Dados para os gráficos
+        const initialData = {
+            grossRevenue: {
+                labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                datasets: {
+                    '2023': [7669, 12632.84, 12285.10, 8750, 8628.16, 3589.30, 19628.10, 21945, 7843.25, 11210, 22633.08, 15819.51],
+                    '2024': [33130, 28110.84, 12038, 5950, 2600, 21500, 6568, 0, 0, 0, 0, 0]
+                }
+            },
+            cost: {
+                labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                datasets: {
+                    '2023': [2794, 6091.69, 7100.59, 2794, 9059.34, 4054.37, 12694.29, 5360, 3596, 10913, 8861.50, 2273],
+                    '2024': [3694.23, 1679, 1679, 1679, 1679, 1679, 1679, 0, 0, 0, 0, 0]
+                }
+            },
+            netRevenue: {
+                labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                datasets: {
+                    '2023': [4875, 6541.15, 5184.51, 5956, -431.18, -465.07, 6933.81, 16585, 4247.25, 297, 13771.58, 13546.51],
+                    '2024': [29435.77, 26431.84, 10359, 4271, 921, 19821, 4889, 0, 0, 0, 0, 0]
+                }
+            }
+        };
+
+        // Configuração inicial dos gráficos
+        const config = {
+            type: 'bar',
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        };
+
+        const grossRevenueChart = new Chart(document.getElementById('grossRevenueChart'), {...config, data: {
+            labels: initialData.grossRevenue.labels,
+            datasets: [
+                {
+                    label: '2023',
+                    data: initialData.grossRevenue.datasets['2023'],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: '2024',
+                    data: initialData.grossRevenue.datasets['2024'],
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1
+                }
+            ]
+        }});
+
+        const costChart = new Chart(document.getElementById('costChart'), {...config, data: {
+            labels: initialData.cost.labels,
+            datasets: [
+                {
+                    label: '2023',
+                    data: initialData.cost.datasets['2023'],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: '2024',
+                    data: initialData.cost.datasets['2024'],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        }});
+
+        const netRevenueChart = new Chart(document.getElementById('netRevenueChart'), {...config, data: {
+            labels: initialData.netRevenue.labels,
+            datasets: [
+                {
+                    label: '2023',
+                    data: initialData.netRevenue.datasets['2023'],
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: '2024',
+                    data: initialData.netRevenue.datasets['2024'],
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }
+            ]
+        }});
+
+        // Função para atualizar os gráficos com base na seleção
+        function updateCharts() {
+            const monthIndex = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+
+            const dataYear = year === '2023' ? '2023' : '2024';
+            const newGrossRevenueData = initialData.grossRevenue.datasets[dataYear];
+            const newCostData = initialData.cost.datasets[dataYear];
+            const newNetRevenueData = initialData.netRevenue.datasets[dataYear];
+
+            grossRevenueChart.data.datasets[0].data = newGrossRevenueData;
+            grossRevenueChart.data.datasets[1].data = newGrossRevenueData;
+            grossRevenueChart.update();
+
+            costChart.data.datasets[0].data = newCostData;
+            costChart.data.datasets[1].data = newCostData;
+            costChart.update();
+
+            netRevenueChart.data.datasets[0].data = newNetRevenueData;
+            netRevenueChart.data.datasets[1].data = newNetRevenueData;
+            netRevenueChart.update();
+
+            populateTable('grossRevenueTable', grossRevenueChart.data);
+            populateTable('costTable', costChart.data);
+            populateTable('netRevenueTable', netRevenueChart.data);
+        }
+
+        document.getElementById('updateCharts').addEventListener('click', updateCharts);
+
+        function populateTable(tableId, data) {
+            const tableBody = document.querySelector(`#${tableId} tbody`);
+            tableBody.innerHTML = '';
+            data.labels.forEach((label, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${label}</td>
+                    <td><input type="number" value="${data.datasets[0].data[index]}" data-index="${index}" data-year="2023"></td>
+                    <td><input type="number" value="${data.datasets[1].data[index]}" data-index="${index}" data-year="2024"></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateChart(chart, data) {
+            chart.data.datasets[0].data = data.datasets[0].data;
+            chart.data.datasets[1].data = data.datasets[1].data;
+            chart.update();
+        }
+
+        function handleInputChange(event, chart, data) {
+            const index = event.target.dataset.index;
+            const year = event.target.dataset.year;
+            const value = parseFloat(event.target.value) || 0;
+            if (year === '2023') {
+                data.datasets[0].data[index] = value;
+            } else {
+                data.datasets[1].data[index] = value;
+            }
+            updateChart(chart, data);
+        }
+
+        function bindTableEvents(tableId, chart, data) {
+            const table = document.querySelector(`#${tableId}`);
+            table.addEventListener('input', (event) => {
+                if (event.target.tagName === 'INPUT') {
+                    handleInputChange(event, chart, data);
+                }
+            });
+        }
+
+        // Inicializa tabelas e eventos
+        populateTable('grossRevenueTable', grossRevenueChart.data);
+        populateTable('costTable', costChart.data);
+        populateTable('netRevenueTable', netRevenueChart.data);
+
+        bindTableEvents('grossRevenueTable', grossRevenueChart, grossRevenueChart.data);
+        bindTableEvents('costTable', costChart, costChart.data);
+        bindTableEvents('netRevenueTable', netRevenueChart, netRevenueChart.data);
+
+        // Função para exportar gráficos para PowerPoint
+        document.getElementById('exportPpt').addEventListener('click', () => {
+            const pptx = new PptxGenJS();
+            const chartContainers = document.querySelectorAll('.chart-container');
+
+            chartContainers.forEach(async (container, index) => {
+                const canvas = await html2canvas(container);
+                const imgData = canvas.toDataURL('image/png');
+
+                const slide = pptx.addSlide();
+                slide.addImage({ data: imgData, x: 1, y: 1, w: 8.5, h: 4.5 });
+                slide.addText(`Gráfico ${index + 1}`, { x: 1, y: 0.5, fontSize: 18 });
+            });
+
+            pptx.writeFile('grafico_imoveis.pptx');
+        });
+    </script>
+</body>
+</html>
